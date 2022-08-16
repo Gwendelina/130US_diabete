@@ -4,7 +4,13 @@ import uvicorn
 # import warnings
 # warnings.filterwarnings("ignore")
 import joblib
+import streamlit as st
 
+import pandas as pd
+
+
+# Problème erreur 422 dans lancement de l'API => voir pourquoi ? Ne semble pas bloquant pour le moment mais à régler : 
+# https://stackoverflow.com/questions/64019054/fastapi-service-results-in-404-when-service-is-started-using-uvicorn-run
 
 # Création de l'instance
 app = FastAPI()
@@ -20,8 +26,8 @@ app = FastAPI()
 # )
 
 # Décorateur @app.get() qui permet de spécifier le chemin URL et l'action http (get) - read data
-@app.get("/root")
-async def root():
+@app.get("/")
+def welcome():
     return {"message": "Bienvenue dans notre API de prédiction"}
 
 @app.get("/prediction/time_in_hospital={time_in_hospital}/num_lab_procedures={num_lab_procedures}/num_procedures={num_procedures}/num_medications={num_medications}/number_outpatient={number_outpatient}/number_emergency:{number_emergency}/number_inpatient:{number_inpatient}/number_diagnoses={number_diagnoses}/ age={age}")
@@ -36,12 +42,16 @@ async def predict(time_in_hospital, num_lab_procedures, num_procedures, num_medi
     model_joblib = joblib.load('model_joblib')    
     prediction = model_joblib.predict(data)
 
-    return prediction
+    return {'Ce patient sera-t-il réhospitalisé?': 'Oui' if prediction == 1 else 'Non'}
 
 
+# streamlit test
 
+st.title("Welcome")
 
     
 # Pour régler erreur 404 (127.0.0.1:50629 - "GET / HTTP/1.1" 404 Not Found)
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1:", port=8000)
+    # uvicorn.run(app, host="0.0.0.0:", port=8000) 
+    
